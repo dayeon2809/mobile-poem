@@ -1,17 +1,24 @@
-:root { color-scheme: dark; font-family: 'Noto Serif KR', Georgia, serif; background: #000; color: white; }
+:root { color-scheme: dark; font-family: 'Noto Serif KR', Georgia, serif; background: #000; color: #eee; --gap: 2vw; }
 * { box-sizing: border-box; }
-body { margin: 0; min-height: 100svh; background: radial-gradient(circle at center, #181818, #000 80%); }
-header { padding: 24px 20px 12px; text-align: center; }
-h1 { font-size: clamp(22px, 2vw, 36px); font-weight: 400; margin: 0 0 12px; }
-header p, footer { color: #aaa; font-family: system-ui, sans-serif; font-size: 14px; line-height: 1.7; }
-#poem-container { display: flex; align-items: stretch; gap: 2vw; padding: 20px 2vw; overflow-x: auto; scroll-snap-type: x mandatory; }
-.poem-card { flex: 0 0 clamp(320px, 30vw, 560px); padding: 26px 24px; background: rgba(255,255,255,.05); scroll-snap-align: start; text-align: center; display: flex; flex-direction: column; align-items: center; }
-.timestamp { color: #ccc; font-size: 13px; margin-bottom: 12px; }
-.author { color: #aaa; font-size: 16px; font-weight: 400; margin: 0; }
-.poem { white-space: pre-wrap; overflow-wrap: anywhere; font-size: clamp(17px, 1.2vw, 23px); line-height: 1.8; margin: 22px 0; }
-.result-link { margin-top: auto; display: flex; flex-direction: column; align-items: center; gap: 10px; color: #ddd; text-decoration: none; font-size: 13px; }
-.qrcode { display: block; width: 160px; height: 160px; background: white; }
-footer { display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; align-items: center; padding: 12px 20px 24px; }
-footer a, button { color: #ddd; background: transparent; border: 1px solid #777; border-radius: 8px; padding: 10px 16px; font: inherit; text-decoration: none; cursor: pointer; }
-:focus-visible { outline: 3px solid #88baff; outline-offset: 4px; }
-@media(max-width: 600px) { #poem-container { gap: 16px; padding-inline: 16px; } .poem-card { flex-basis: calc(100vw - 32px); padding: 24px 18px; } }
+body { margin: 0; height: 100svh; display: flex; flex-direction: column; background: radial-gradient(ellipse at center, #141414, #000 75%); overflow: hidden; }
+header { flex: none; padding: 24px 20px 6px; text-align: center; }
+h1 { font-size: clamp(22px, 2.3vw, 42px); font-weight: 400; margin: 0 0 10px; }
+header p, footer { color: #aaa; font-family: system-ui, sans-serif; font-size: 13px; line-height: 1.6; }
+header p { margin: 0; }
+#poem-container { flex: 1; min-height: 0; display: flex; align-items: stretch; gap: var(--gap); padding: 24px 2vw; overflow-x: auto; overflow-y: hidden; scrollbar-width: thin; scrollbar-color: #555 #111; }
+.poem-card { flex: 0 0 calc((100% - 2 * var(--gap)) / 3); min-width: 0; padding: clamp(16px, 1.6vw, 30px); background: rgba(255,255,255,.045); text-align: center; display: flex; flex-direction: column; align-items: center; animation: float 9s ease-in-out infinite; }
+.poem-card:nth-child(3n+2) { animation-delay: -3s; }
+.poem-card:nth-child(3n) { animation-delay: -6s; }
+.timestamp { color: #aaa; font-size: clamp(11px, .9vw, 16px); margin-bottom: 8px; }
+.author { color: #bbb; font-size: clamp(14px, 1.1vw, 20px); font-weight: 400; margin: 0; }
+.poem { width: 100%; min-height: 0; flex: 1; overflow-y: auto; scrollbar-width: thin; white-space: pre-wrap; overflow-wrap: anywhere; font-size: clamp(15px, 1.15vw, 24px); line-height: 1.8; margin: 18px 0; }
+.result-link { flex: none; display: flex; flex-direction: column; align-items: center; gap: 8px; color: #ccc; text-decoration: none; font-size: 12px; }
+.qrcode { display: block; width: clamp(100px, 13vh, 160px); height: clamp(100px, 13vh, 160px); background: white; }
+footer { flex: none; display: flex; flex-wrap: wrap; gap: 8px 14px; justify-content: center; align-items: center; padding: 6px 20px 12px; }
+footer p { margin: 0; }
+footer a, button { color: #ccc; background: transparent; border: 1px solid #555; border-radius: 6px; padding: 8px 12px; font: inherit; text-decoration: none; cursor: pointer; }
+:focus-visible { outline: 3px solid #88baff; outline-offset: 3px; }
+body.paused .poem-card, #poem-container:hover .poem-card, #poem-container:focus-within .poem-card { animation-play-state: paused; }
+@keyframes float { 0%,100% { transform: translateY(-7px); } 50% { transform: translateY(7px); } }
+@media(max-width: 700px) { :root { --gap: 16px; } header { padding-top: 16px; } h1 { font-size: 21px; } #poem-container { padding-inline: 16px; } .poem-card { flex-basis: 100%; } footer { font-size: 11px; gap: 6px; } }
+@media(prefers-reduced-motion: reduce) { .poem-card { animation: none; } }
