@@ -83,3 +83,17 @@ test('unknown results and private server files are not exposed', async t => {
     assert.equal((await fetch(f.base + url)).status, 200);
   }
 });
+
+test('sheet errors identify tab, permissions and key problems without leaking upstream details', async () => {
+  const {describeFailure}=require('../app-core');
+  for (const [message,status,expected] of [
+    ['Unable to parse range: private-tab-name',400,'SHEETS_TAB'],
+    ['Forbidden for private-account@example.com',403,'SHEETS_PERMISSION'],
+    ['error:1E08010C:DECODER routines::unsupported',undefined,'SHEETS_CREDENTIALS'],
+    ['Requested entity was not found',404,'SHEETS_NOT_FOUND'],
+  ]) {
+    const result=describeFailure(Object.assign(new Error(message),{stage:'sheets.read',response:{status}}));
+    assert.equal(result.code,expected);
+    assert.ok(!JSON.stringify(result).includes(message));
+  }
+});

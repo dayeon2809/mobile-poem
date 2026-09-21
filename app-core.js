@@ -5,6 +5,35 @@ const { emotions, questions } = require('./public/questions.json');
 
 const idPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
+// Classify upstream errors without returning credentials, request config or sheet contents.
+function describeFailure(error) {
+  const message = String(error.response?.data?.error?.message || error.response?.data?.error_description || error.message || '');
+  const status = error.response?.status || error.status;
+  if (error.stage?.startsWith('sheets')) {
+    if (/DECODER|unsupported|PEM|private key|secretOrPrivateKey|invalid_grant|Invalid JWT|invalid signature|invalid_client/i.test(message + ' ' + error.code))
+      return { code: 'SHEETS_CREDENTIALS', error: 'Google 인증에 실패했습니다. GCP_CLIENT_EMAIL과 GCP_PRIVATE_KEY의 줄바꿈·따옴표·키 유효성을 확인한 뒤 Vercel에서 재배포해 주세요.' };
+    if (/Unable to parse range|Invalid range|not a valid sheet/i.test(message))
+      return { code: 'SHEETS_TAB', error: '시트 탭을 찾을 수 없습니다. 스프레드시트에 mobile_poems 탭을 만들거나 SHEET_NAME을 실제 탭 이름으로 설정한 뒤 재배포해 주세요.' };
+    if (/SERVICE_DISABLED|has not been used|is disabled/i.test(message))
+      return { code: 'SHEETS_API_DISABLED', error: 'Google Cloud에서 서비스 계정 프로젝트의 Google Sheets API를 활성화해 주세요.' };
+    if (status === 403)
+      return { code: 'SHEETS_PERMISSION', error: 'Google Sheets 접근 권한이 없습니다. 스프레드시트를 GCP_CLIENT_EMAIL 계정에 편집자로 공유해 주세요.' };
+    if (status === 404)
+      return { code: 'SHEETS_NOT_FOUND', error: '스프레드시트를 찾을 수 없습니다. SHEET_ID와 서비스 계정의 공유 권한을 확인해 주세요.' };
+    if (status === 401)
+      return { code: 'SHEETS_CREDENTIALS', error: 'Google 서비스 계정 인증을 확인해 주세요.' };
+    if (error instanceof SyntaxError)
+      return { code: 'SHEETS_DATA_FORMAT', error: '저장된 데이터 형식이 맞지 않습니다. 기존 전시용 탭 대신 새 mobile_poems 탭을 사용해 주세요.' };
+    return { code: 'SHEETS_UNAVAILABLE', error: 'Google Sheets 연결에 실패했습니다. 시트 설정과 Vercel 함수 로그를 확인해 주세요.' };
+  }
+  return { code: 'POEM_GENERATION_FAILED', error: '시 생성에 실패했습니다. 잠시 후 다시 시도해 주세요.' };
+}
+
+async function atStage(stage, operation) {
+  try { return await operation(); }
+  catch (error) { error.stage = stage; throw error; }
+}
+
 function validate(body) {
   if (!body || !idPattern.test(body.id || '') || typeof body.name !== 'string' ||
       body.name.length > 30 || !Array.isArray(body.emotions) || !body.emotions.length ||
@@ -86,11 +115,11 @@ function createApp({ store, makePoem }) {
       if (!pending.has(data.id)) {
         if (pending.size >= 10) return res.status(503).json({ error: '참여자가 많습니다. 잠시 후 다시 제출해 주세요.' });
         const task = (async () => {
-          const existing = await store.get(data.id);
+          const existing = await atStage('sheets.read', () => store.get(data.id));
           if (existing) return existing;
-          const poem = await makePoem(data);
+          const poem = await atStage('poem.generate', () => makePoem(data));
           const record = { ...data, poem, timestamp: new Date().toISOString() };
-          await store.save(record);
+          await atStage('sheets.write', () => store.save(record));
           return record;
         })();
         pending.set(data.id, task);
@@ -103,19 +132,24 @@ function createApp({ store, makePoem }) {
   app.get('/api/poems/:id', async (req, res, next) => {
     try {
       if (!idPattern.test(req.params.id)) return res.status(404).json({ error: '결과를 찾을 수 없습니다.' });
-      const record = await store.get(req.params.id);
+      const record = await atStage('sheets.read', () => store.get(req.params.id));
       if (!record) return res.status(404).json({ error: '결과를 찾을 수 없습니다.' });
       res.json({ name: record.name, emotions: record.emotions, poem: record.poem, timestamp: record.timestamp });
     } catch (error) { next(error); }
   });
   app.use(express.static(path.join(__dirname, 'public')));
   app.use((error, req, res, next) => {
-    const status = error.status === 400 || error.status === 413 ? error.status : 502;
-    if (status === 502) console.error('Poem request failed:', error.code || error.name);
+    const status = !error.stage && (error.status === 400 || error.status === 413) ? error.status : 502;
+    if (status === 502) {
+      const failure = describeFailure(error);
+      console.error('Poem request failed:', JSON.stringify({ stage: error.stage, code: failure.code,
+        upstreamStatus: error.response?.status || error.status }));
+      return res.status(status).json(failure);
+    }
     res.status(status).json({ error: status === 400 ? '응답 형식을 확인해 주세요.' : status === 413
       ? '입력 내용이 너무 깁니다.' : '시 생성 또는 저장에 실패했습니다. 응답은 화면에 남아 있으니 다시 시도해 주세요.' });
   });
   return app;
 }
 
-module.exports = { createApp, validate, createSheetStore, generatePoem };
+module.exports = { createApp, validate, createSheetStore, generatePoem, describeFailure };
