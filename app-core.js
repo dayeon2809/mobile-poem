@@ -1,5 +1,6 @@
 const path = require('node:path');
 const express = require('express');
+const QRCode = require('qrcode');
 const { google } = require('googleapis');
 const { emotions, questions } = require('./public/questions.json');
 
@@ -56,8 +57,14 @@ function createSheetStore(env) {
   });
   const sheets = google.sheets({ version: 'v4', auth });
   const spreadsheetId = env.SHEET_ID;
-  const range = `'${(env.SHEET_NAME || 'mobile_poems').replace(/'/g, "''")}'!A:F`;
+  const range = `'${(env.SHEET_NAME || 'mobile_poems').replace(/'/g, "''")}'!A:H`;
   return {
+    async list() {
+      const response = await sheets.spreadsheets.values.get({ spreadsheetId, range }, { timeout: 20000 });
+      return (response.data.values || []).filter(row => idPattern.test(row[0] || '') && row[5])
+        .map(row => ({ id: row[0], timestamp: row[1], name: row[2] || '익명', poem: row[5] }))
+        .sort((a, b) => String(b.timestamp).localeCompare(String(a.timestamp))).slice(0, 10);
+    },
     async get(id) {
       const response = await sheets.spreadsheets.values.get({ spreadsheetId, range }, { timeout: 20000 });
       const row = (response.data.values || []).find(row => row[0] === id);
@@ -68,7 +75,7 @@ function createSheetStore(env) {
       await sheets.spreadsheets.values.append({
         spreadsheetId, range, valueInputOption: 'RAW', insertDataOption: 'INSERT_ROWS',
         requestBody: { values: [[record.id, record.timestamp, record.name,
-          JSON.stringify(record.emotions), JSON.stringify(record.answers), record.poem]] },
+          JSON.stringify(record.emotions), JSON.stringify(record.answers), record.poem, record.resultUrl, record.qrUrl]] },
       }, { timeout: 20000 });
     },
   };
@@ -96,8 +103,10 @@ async function generatePoem(data, env) {
   return poem;
 }
 
-function createApp({ store, makePoem }) {
+function createApp({ store, makePoem, publicBaseUrl = 'http://localhost:3100' }) {
   const app = express();
+  const baseUrl = new URL(publicBaseUrl).origin;
+  const links = id => ({ resultUrl: `${baseUrl}/poem.html?id=${id}`, qrUrl: `${baseUrl}/api/qr/${id}` });
   const pending = new Map();
   app.disable('x-powered-by');
   app.use((req, res, next) => {
@@ -109,6 +118,20 @@ function createApp({ store, makePoem }) {
   });
   app.use(express.json({ limit: '12kb' }));
   app.get('/health', (req, res) => res.json({ ok: true }));
+  app.get('/api/poems', async (req, res, next) => {
+    try {
+      const records = await atStage('sheets.read', () => store.list());
+      res.json({ poems: records.map(record => ({ id: record.id, timestamp: record.timestamp,
+        name: record.name, poem: record.poem, ...links(record.id) })) });
+    } catch (error) { next(error); }
+  });
+  app.get('/api/qr/:id', async (req, res, next) => {
+    try {
+      if (!idPattern.test(req.params.id)) return res.status(404).end();
+      const png = await QRCode.toBuffer(links(req.params.id).resultUrl, { type: 'png', width: 256, margin: 4, errorCorrectionLevel: 'M' });
+      res.type('png').send(png);
+    } catch (error) { next(error); }
+  });
   app.post('/api/poems', async (req, res, next) => {
     try {
       const data = validate(req.body);
@@ -118,7 +141,7 @@ function createApp({ store, makePoem }) {
           const existing = await atStage('sheets.read', () => store.get(data.id));
           if (existing) return existing;
           const poem = await atStage('poem.generate', () => makePoem(data));
-          const record = { ...data, poem, timestamp: new Date().toISOString() };
+          const record = { ...data, poem, timestamp: new Date().toISOString(), ...links(data.id) };
           await atStage('sheets.write', () => store.save(record));
           return record;
         })();

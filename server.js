@@ -10,7 +10,9 @@ if (missing.length) throw new Error(`서버 환경변수 설정 필요: ${missin
 // Vercel detects this exported Express application. Importing it never opens a port.
 const app = express();
 app.disable('x-powered-by');
-app.use(createApp({ store: createSheetStore(env), makePoem: data => generatePoem(data, env) }));
+const publicBaseUrl = env.PUBLIC_BASE_URL || (env.VERCEL_PROJECT_PRODUCTION_URL
+  ? `https://${env.VERCEL_PROJECT_PRODUCTION_URL}` : `http://localhost:${env.PORT || 3100}`);
+app.use(createApp({ store: createSheetStore(env), makePoem: data => generatePoem(data, env), publicBaseUrl }));
 module.exports = app;
 
 if (require.main === module) {

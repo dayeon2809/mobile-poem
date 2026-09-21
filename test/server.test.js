@@ -10,7 +10,7 @@ function payload() {
 async function fixture(t, makePoem = async data => `${data.name}의 시`) {
   const records = new Map();
   let saves = 0;
-  const app = createApp({ store: { get: async id => records.get(id), save: async record => { saves++; records.set(record.id, record); } }, makePoem });
+  const app = createApp({ store: { list: async () => [...records.values()], get: async id => records.get(id), save: async record => { saves++; records.set(record.id, record); } }, makePoem });
   const server = app.listen(0, '127.0.0.1');
   await new Promise(resolve => server.once('listening', resolve));
   t.after(() => new Promise(resolve => { server.close(resolve); server.closeAllConnections(); }));
@@ -96,4 +96,23 @@ test('sheet errors identify tab, permissions and key problems without leaking up
     assert.equal(result.code,expected);
     assert.ok(!JSON.stringify(result).includes(message));
   }
+});
+
+
+test('gallery exposes poems and QR links without survey answers; submissions persist links', async t => {
+  const f = await fixture(t);
+  const data = payload();
+  assert.equal((await f.post(data)).status, 200);
+  const saved = f.records.get(data.id);
+  assert.equal(saved.resultUrl, 'http://localhost:3100/poem.html?id=' + data.id);
+  assert.equal(saved.qrUrl, 'http://localhost:3100/api/qr/' + data.id);
+  const listing = await (await fetch(f.base + '/api/poems')).json();
+  assert.equal(listing.poems[0].id, data.id);
+  assert.equal(listing.poems[0].answers, undefined);
+  const qr = await fetch(f.base + '/api/qr/' + data.id);
+  assert.equal(qr.status, 200);
+  assert.match(qr.headers.get('content-type'), /image\/png/);
+  const png = Buffer.from(await qr.arrayBuffer());
+  assert.equal(png.subarray(1,4).toString(), 'PNG');
+  assert.equal((await fetch(f.base + '/api/qr/invalid')).status, 404);
 });

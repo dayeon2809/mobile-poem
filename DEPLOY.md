@@ -81,3 +81,7 @@ Vercel에서 **Add New → Project**를 선택하고 GitHub 저장소를 Import�
 - [Express on Vercel](https://vercel.com/docs/frameworks/backend/express)
 - [함수 실행 시간 설정](https://vercel.com/docs/functions/configuring-functions/duration)
 - [환경변수](https://vercel.com/docs/environment-variables)
+
+## 시·QR 전시 화면
+
+운영 주소 뒤에 `/gallery.html`을 붙이면 최근 시 10편과 개인 결과 QR이 표시됩니다. 새 저장 행은 G열 `resultUrl`, H열 `qrUrl`을 포함합니다. 기존 A:F 형식은 유지합니다. QR 도메인은 Vercel Production 도메인이 자동 적용되며 필요하면 `PUBLIC_BASE_URL`로 지정할 수 있습니다.
