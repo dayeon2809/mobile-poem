@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <title>나의 몸의 시</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="poem.js" defer></script>
+  <script src="space.js" defer></script>
+</head>
+<body>
+  <canvas id="space" aria-hidden="true"></canvas>
+  <main class="shell">
+    <a class="brand" href="/">RE:CHOREOGRAPH <span>다시 쓰는 몸</span></a>
+    <article class="panel">
+      <h1 id="title">당신의 몸이 남긴 시</h1>
+      <p id="meta" class="result-meta"></p>
+      <p id="status" role="status">시를 불러오고 있어요.</p>
+      <div id="poem" class="poem"></div>
+      <p class="note">이 링크를 보관하면 나중에도 시를 다시 볼 수 있어요. 링크를 공유하면 상대방도 이 시를 볼 수 있습니다.</p>
+      <div class="actions"><button id="copy" class="primary" hidden>링크 복사</button><a class="button secondary" href="/">새로운 시 쓰기</a></div>
+      <button id="retry" class="secondary" hidden>다시 불러오기</button>
+    </article>
+    <footer>당신의 몸이 들려준 이야기를 간직하세요.</footer>
+  </main>
+</body>
+</html>
