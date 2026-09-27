@@ -1,0 +1,9 @@
+PC 전시 화면: https://mobile-poem-psi.vercel.app/pc-intro/
+
+기존 mobile-poem Vercel 프로젝트가 main 브랜치에 연결되어 있으면
+git push 후 자동으로 배포됩니다. 추가 환경변수는 필요하지 않습니다.
+index.html과 dance-film.mp4를 함께 유지하세요.
+Pretendard와 QR은 HTML에 내장되어 있습니다.
+
+HTML의 style/script 내용을 수정하면 루트 vercel.json에 있는
+pc-intro 경로의 CSP SHA-256 해시도 갱신해야 합니다.

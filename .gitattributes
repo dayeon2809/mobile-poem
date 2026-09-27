@@ -1,0 +1,2 @@
+# Keep inline script/style bytes stable for Content-Security-Policy hashes.
+public/pc-intro/index.html -text
