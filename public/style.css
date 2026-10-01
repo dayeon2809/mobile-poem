@@ -7,7 +7,7 @@ body { margin: 0; min-height: 100svh; }
 .brand { display: block; color: #c8c8c8; font-size: 13px; text-decoration: none; margin: 8px 0 32px; }
 .brand span { margin-left: 8px; }
 .panel { margin: auto; padding: 16px 0; max-width: 720px; }
-#welcome { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); align-items: center; gap: 48px; max-width: 960px; min-height: 75svh; }
+#welcome { display: grid; grid-template-columns: minmax(0, .95fr) minmax(0, 1.05fr); align-items: center; gap: 48px; max-width: 960px; min-height: 75svh; }
 .poster { display: block; width: 100%; max-height: 65svh; object-fit: contain; }
 .welcome-copy { min-width: 0; }
 h1 { font-size: clamp(24px, 4.5vw, 32px); line-height: 1.5; font-weight: 400; margin: 0 0 16px; word-break: keep-all; overflow-wrap: anywhere; }
@@ -60,7 +60,7 @@ footer { color: #969696; text-align: center; font-size: 12px; margin: 28px 0 8px
   .shell { padding-inline: max(16px, env(safe-area-inset-left)); }
   .brand { margin-bottom: 20px; font-size: 11px; }
   #welcome { display: flex; flex-direction: column; gap: 24px; min-height: 0; }
-  .poster { width: min(65%, 240px); max-height: 36svh; }
+  .poster { width: min(72%, 270px); max-height: 40svh; }
   .options { gap: 12px; margin-block: 24px; }
   .option { font-size: 16px; min-height: 64px; }
   input, textarea { font-size: 16px; }

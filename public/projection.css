@@ -12,5 +12,5 @@ body.projection-intro .eyebrow{margin-bottom:18px}
 body.projection-intro footer{padding-top:12px}
 body.projection-survey .shell,body.projection-poem .shell{margin-top:var(--projection-top);min-height:calc(100svh - var(--projection-top))}
 body.projection-survey #welcome{min-height:calc(70svh - var(--projection-top))}
-body.projection-survey .poster{max-height:calc(65svh - var(--projection-top))}
+body.projection-survey .poster{max-height:calc(72svh - var(--projection-top))}
 }
