@@ -12,8 +12,6 @@ async function load() {
     $('poem').textContent = result.poem;
     $('status').textContent = '';
     $('copy').hidden = false;
-    $('qr').src = `/api/qr/${encodeURIComponent(id)}`;
-    $('qr').hidden = false;
     try {
       const draft = JSON.parse(sessionStorage.getItem('body-poem-draft-v1'));
       if (draft?.id === id) sessionStorage.removeItem('body-poem-draft-v1');

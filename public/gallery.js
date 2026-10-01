@@ -14,9 +14,7 @@ function createCard(item) {
   card.append(element('div', 'timestamp'), element('h2', 'author'), element('div', 'poem'));
   const link = element('a', 'result-link');
   link.href = `/poem.html?id=${encodeURIComponent(item.id)}`;
-  const qr = element('img', 'qrcode');
-  qr.src = `/api/qr/${encodeURIComponent(item.id)}`; qr.width = 160; qr.height = 160;
-  link.append(qr, element('span', '', 'QR을 스캔하거나 눌러 시 열기'));
+  link.textContent = '시 열기';
   card.append(link); return card;
 }
 function updateCards(items) {
@@ -35,7 +33,6 @@ function updateCards(items) {
       const node = card.querySelector(selector);
       if (node.textContent !== value) node.textContent = value;
     }
-    card.querySelector('img').alt = `${item.name}님의 시 열기 QR 코드`;
     if (container.children[index] !== card) container.insertBefore(card, container.children[index] || null);
   });
   if (anchor?.isConnected) container.scrollLeft += anchor.getBoundingClientRect().left - anchorX;

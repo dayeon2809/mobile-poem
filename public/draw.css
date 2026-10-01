@@ -2,21 +2,6 @@
 
 @font-face{font-family:Pretendard;src:url('Pretendard-Regular.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap}
 
-/* Projection safe area: reserve the top 15% and fit content below it. */
-:root{--projection-top:15svh}
-body::before{content:'';position:fixed;inset:0 0 auto;height:var(--projection-top);background:#000;z-index:2;pointer-events:none}
-main{height:calc(100svh - var(--projection-top));min-height:0;margin-top:var(--projection-top);padding:18px 5vw;overflow:hidden}
-header,footer,.intro{flex-shrink:0}
-.intro{margin:18px 0 12px}
-h1{font-size:clamp(32px,4vw,58px);margin:10px 0}
-.intro .eyebrow{margin:0}.intro>p:last-child{margin:10px 0}
-.constellation{min-height:70px;overflow:auto;padding:12px 0 20px;display:block;align-content:center}
-#names{margin:auto;gap:14px 28px}#names li{padding:6px 12px}
-footer{padding-top:12px}.day{margin-bottom:12px}.note{margin-top:10px;font-size:10px}
-button{padding:12px 24px}
-dialog{top:var(--projection-top);bottom:0;max-height:calc(100svh - var(--projection-top) - 24px);overflow:auto}
-#winner-dialog{padding:20px}.sparkle{margin:12px 0 6px;font-size:32px}#winner-name{margin:12px 0;font-size:clamp(44px,7vw,100px)}#winner-dialog .secondary{margin-top:12px}
-@media(max-width:650px){main{padding:12px 5vw}header{gap:8px}.intro{margin:12px 0}h1{font-size:32px}.intro>p:last-child{font-size:12px}.actions{gap:8px}.actions button{width:auto;min-width:0;font-size:12px}.day{gap:8px}.note{font-size:9px}}
 /* Draw ceremony: orbit while mixing, then a single gentle reveal. */
 #winner-dialog.shuffling .sparkle{animation:draw-orbit 1.8s linear infinite;transform-origin:center;color:#d2b7ff}
 #winner-dialog.shuffling #winner-name{color:#cab8ee;filter:blur(.3px)}
