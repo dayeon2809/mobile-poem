@@ -2,6 +2,7 @@
   const $ = id => document.getElementById(id);
   const dayKey = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
   let today = dayKey(), records = [], participants = [], ready = false, busy = false, generation = 0;
+  let drawing = false, shuffleTimer;
   $('date').value = today;
   const key = () => 'body-poem-draw-reset:' + $('date').value;
   let excluded = new Set();
@@ -28,11 +29,11 @@
     $('count').textContent = participants.length + '개의 별';
     $('empty').hidden = participants.length > 0;
     $('empty').textContent = excluded.size ? '새로운 몸의 시를 기다리고 있습니다.' : '이 날짜에 완성된 시가 아직 없습니다. 첫 번째 별을 기다립니다.';
-    $('draw').disabled = !ready || !participants.length || busy;
-    $('reset').disabled = !ready || !participants.length || busy;
+    $('draw').disabled = !ready || !participants.length || busy || drawing;
+    $('reset').disabled = !ready || !participants.length || busy || drawing;
   }
   async function refresh() {
-    if (busy || document.hidden) return;
+    if (busy || drawing || document.hidden) return;
     const currentDay = dayKey();
     if (currentDay !== today) {
       if ($('date').value === today) { $('date').value = currentDay; records = []; loadReset(); $('winner-dialog').close(); }
@@ -58,18 +59,58 @@
   }
   $('date').addEventListener('change', () => { generation++; records = []; ready = false; loadReset(); render(); refresh(); });
   $('draw').addEventListener('click', async () => {
+    if (drawing || busy) return;
     const selectedDate = $('date').value;
     await refresh();
     if (!ready || busy || !participants.length || selectedDate !== $('date').value) return;
     // Rejection sampling keeps each saved poem equally likely.
     const n = participants.length, limit = Math.floor(4294967296 / n) * n, value = new Uint32Array(1);
     do { crypto.getRandomValues(value); } while (value[0] >= limit);
-    const winner = participants[value[0] % n];
-    $('winner-name').textContent = winner.name;
-    $('winner-code').textContent = '별 ' + winner.id.slice(0, 8).toUpperCase() + ' · ' + selectedDate;
-    $('winner-dialog').showModal();
+    const pool = participants.slice();
+    const winner = pool[value[0] % n];
+    const dialog = $('winner-dialog');
+    const headline = dialog.querySelector('.eyebrow');
+    const message = dialog.querySelector('.winner-content > p:last-of-type');
+    const showPerson = person => {
+      $('winner-name').textContent = person.name;
+      $('winner-code').textContent = '별 ' + person.id.slice(0, 8).toUpperCase() + ' · ' + selectedDate;
+    };
+    drawing = true; $('date').disabled = true; render();
+    dialog.classList.remove('revealed'); dialog.classList.add('shuffling');
+    headline.textContent = '별들이 섞이고 있습니다';
+    message.textContent = pool.length + '개의 이야기 중, 하나의 별을 기다려주세요.';
+    $('close-winner').textContent = '추첨 취소';
+    dialog.showModal();
+    const reveal = () => {
+      showPerson(winner);
+      dialog.classList.remove('shuffling'); dialog.classList.add('revealed');
+      headline.textContent = '오늘, 우리 우주의 주인공';
+      message.textContent = '당신의 이야기에 귀 기울입니다.';
+      $('close-winner').textContent = '명단으로 돌아가기';
+      drawing = false; $('date').disabled = false; render();
+    };
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches || pool.length === 1) { reveal(); return; }
+    // Shuffle a display deck; the independently sampled final winner remains unbiased.
+    let deck = [], tick = 0, previousId;
+    const shuffle = () => {
+      if (!drawing || !dialog.open) return;
+      if (!deck.length) {
+        deck = pool.slice();
+        for (let i=deck.length-1;i>0;i--) { const j=Math.floor(Math.random()*(i+1)); [deck[i],deck[j]]=[deck[j],deck[i]]; }
+        if (deck[deck.length-1].id === previousId) [deck[0],deck[deck.length-1]]=[deck[deck.length-1],deck[0]];
+      }
+      const person=deck.pop(); previousId=person.id; showPerson(person);
+      tick++;
+      if (tick >= 24) { shuffleTimer=setTimeout(reveal,450); return; }
+      shuffleTimer=setTimeout(shuffle,55+Math.pow(tick/24,3)*300);
+    };
+    shuffle();
   });
   $('close-winner').addEventListener('click', () => $('winner-dialog').close());
+  $('winner-dialog').addEventListener('close', () => {
+    clearTimeout(shuffleTimer); drawing = false; $('date').disabled = false;
+    $('winner-dialog').classList.remove('shuffling', 'revealed'); render();
+  });
   $('reset').addEventListener('click', () => $('reset-dialog').showModal());
   $('cancel-reset').addEventListener('click', () => $('reset-dialog').close());
   $('confirm-reset').addEventListener('click', () => {
