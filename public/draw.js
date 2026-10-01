@@ -22,13 +22,13 @@
         node.append(name, code); $('names').append(node);
       }
       node.children[0].textContent = person.name;
-      node.children[1].textContent = '별 ' + person.id.slice(0, 8).toUpperCase();
+      node.children[1].textContent = '참여 번호 ' + person.id.slice(0, 8).toUpperCase();
       existing.delete(person.id);
     }
     existing.forEach(node => node.remove());
-    $('count').textContent = participants.length + '개의 별';
+    $('count').textContent = participants.length + '편의 시';
     $('empty').hidden = participants.length > 0;
-    $('empty').textContent = excluded.size ? '새로운 몸의 시를 기다리고 있습니다.' : '이 날짜에 완성된 시가 아직 없습니다. 첫 번째 별을 기다립니다.';
+    $('empty').textContent = excluded.size ? '새로운 몸의 시를 기다리고 있습니다.' : '이 날짜에 완성된 시가 아직 없습니다. 첫 번째 몸의 시를 기다립니다.';
     $('draw').disabled = !ready || !participants.length || busy || drawing;
     $('reset').disabled = !ready || !participants.length || busy || drawing;
   }
@@ -73,19 +73,19 @@
     const message = dialog.querySelector('.winner-content > p:last-of-type');
     const showPerson = person => {
       $('winner-name').textContent = person.name;
-      $('winner-code').textContent = '별 ' + person.id.slice(0, 8).toUpperCase() + ' · ' + selectedDate;
+      $('winner-code').textContent = '참여 번호 ' + person.id.slice(0, 8).toUpperCase() + ' · ' + selectedDate;
     };
     drawing = true; $('date').disabled = true; render();
     dialog.classList.remove('revealed'); dialog.classList.add('shuffling');
-    headline.textContent = '별들이 섞이고 있습니다';
-    message.textContent = pool.length + '개의 이야기 중, 하나의 별을 기다려주세요.';
+    headline.textContent = '오늘의 다시 쓰일 몸은?';
+    message.textContent = pool.length + '편의 시 속에서, 오늘 다시 쓰일 몸을 만나봅니다.';
     $('close-winner').textContent = '추첨 취소';
     dialog.showModal();
     const reveal = () => {
       showPerson(winner);
       dialog.classList.remove('shuffling'); dialog.classList.add('revealed');
-      headline.textContent = '오늘, 우리 우주의 주인공';
-      message.textContent = '당신의 이야기에 귀 기울입니다.';
+      headline.textContent = '오늘의 다시 쓰일 몸은?';
+      message.textContent = '당신의 몸이 남긴 시, 이제 다시 쓰입니다.';
       $('close-winner').textContent = '명단으로 돌아가기';
       drawing = false; $('date').disabled = false; render();
     };
