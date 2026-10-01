@@ -19,7 +19,7 @@ function showStep() {
   $('progress').max = config.questions.length + 1;
   $('progress').value = step + 1;
   $('question').textContent = isEmotion ? '오늘, 당신의 하루는 어떤 기분인가요?' : question.question;
-  $('hint').textContent = isEmotion ? '지금 느껴지는 감정을 모두 골라주세요.' : isText ? '떠오르는 말이 없다면 비워 두어도 괜찮아요.' : '가장 가까운 답을 하나 골라주세요.';
+  $('hint').textContent = isEmotion ? '지금 가장 가까운 감정 하나를 골라주세요.' : isText ? '떠오르는 말이 없다면 비워 두어도 괜찮아요.' : '가장 가까운 답을 하나 골라주세요.';
   $('options').replaceChildren();
   $('options').classList.toggle('emotions', isEmotion);
   $('options').hidden = isText;
@@ -33,13 +33,13 @@ function showStep() {
     button.textContent = label;
     button.setAttribute('aria-pressed', String(isEmotion ? draft.emotions.includes(label) : draft.answers[step - 1] === label));
     button.onclick = event => {
-      if (busy || advanceTimer !== null || (!isEmotion && event.detail > 1)) return;
-      if (isEmotion) draft.emotions = draft.emotions.includes(label) ? draft.emotions.filter(e => e !== label) : [...draft.emotions, label];
+      if (busy || advanceTimer !== null || event.detail > 1) return;
+      if (isEmotion) draft.emotions = [label];
       else draft.answers[step - 1] = label;
       save();
       for (const item of $('options').children) item.setAttribute('aria-pressed', String(isEmotion ? draft.emotions.includes(item.textContent) : draft.answers[step - 1] === item.textContent));
       updateNext();
-      if (!isEmotion) {
+      {
         for (const item of $('options').children) item.disabled = true;
         advanceTimer = setTimeout(() => {
           advanceTimer = null;
@@ -50,7 +50,7 @@ function showStep() {
     $('options').append(button);
   }
   $('next').textContent = step === config.questions.length ? '나의 시 만들기' : '다음';
-  $('next').hidden = !isEmotion && !isText;
+  $('next').hidden = !isText;
   updateNext();
   $('question').focus();
 }

@@ -68,3 +68,23 @@ footer { color: #969696; text-align: center; font-size: 12px; margin: 28px 0 8px
   .actions > * { flex: 1; min-width: 0; font-size: 18px; padding-inline: 12px; }
 }
 
+/* Fit the survey to the available projection area without clipping controls. */
+body.projection-survey{height:100svh;min-height:0;overflow:hidden}
+body.projection-survey .shell{min-height:0!important;padding-block:12px;margin-bottom:0}
+body.projection-survey .brand{margin:4px 0 14px}
+body.projection-survey #welcome{min-height:0;gap:30px}
+body.projection-survey #survey{padding:4px 0}
+body.projection-survey #survey h1{font-size:clamp(20px,2.5vw,30px);margin:0 0 8px}
+body.projection-survey #hint{margin:6px 0}
+body.projection-survey .options{gap:10px 20px;margin:14px auto}
+body.projection-survey .options.emotions{width:min(65vw,38svh,360px);margin:10px auto}
+body.projection-survey .option{min-height:46px;font-size:17px;padding:9px 12px}
+body.projection-survey .emotions .option{min-height:0;font-size:clamp(10px,1.7vh,15px);padding:0}
+body.projection-survey #selected{font-size:15px;margin:6px 0}
+body.projection-survey .actions{margin-top:12px}
+body.projection-survey .actions button{min-height:42px;padding:8px 20px;font-size:17px}
+body.projection-survey progress{height:8px;margin:14px auto 8px}
+body.projection-survey .progress-label{font-size:14px;margin:4px}
+body.projection-survey #status:empty,body.projection-survey #load-error:empty{display:none}
+body.projection-survey footer{margin:10px 0 0}
+@media(max-width:600px){body.projection-survey #welcome{gap:12px}body.projection-survey .poster{max-height:30svh;width:min(68%,250px)}body.projection-survey .intro{margin:12px 0}body.projection-survey .note{margin:12px 0}body.projection-survey .options.emotions{width:min(82vw,40svh,340px)}}
