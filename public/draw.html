@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>다시 쓰는 몸 · 이름의 우주</title>
+<link rel="stylesheet" href="draw.css"><script src="space.js" defer></script><script src="draw.js" defer></script>
+</head>
+<body>
+<canvas id="space" aria-hidden="true"></canvas>
+<main>
+<header><a href="/pc-intro/">RE:CHOREOGRAPH <span>다시 쓰는 몸</span></a><span id="connection" role="status">시트에 연결하는 중…</span></header>
+<section class="intro"><p class="eyebrow">우리의 이야기가 모이는 곳</p><h1>이름의 우주</h1><p>당신의 몸이 남긴 시, 이곳에 하나의 별이 됩니다.</p></section>
+<section class="constellation" aria-label="참여자 명단"><p id="empty">참여자 명단을 불러오고 있습니다.</p><ul id="names"></ul></section>
+<footer><div class="day"><label for="date">참여 날짜</label><input id="date" type="date"><span id="count">0개의 별</span></div>
+<div class="actions"><button id="reset" class="secondary" disabled>이 날짜 명단 리셋</button><button id="draw" class="primary" disabled>랜덤 1명 뽑기 <span>✦</span></button></div>
+<p class="note">한국 시간 기준 · 10초마다 갱신 · 시 1편당 추첨 기회 1회<br>리셋은 이 브라우저의 명단에만 적용되며, 시트 원본은 유지됩니다.</p></footer>
+</main>
+<dialog id="winner-dialog"><div class="winner-content"><p class="eyebrow">오늘, 우리 우주의 주인공</p><p class="sparkle" aria-hidden="true">✦</p><h2 id="winner-name"></h2><p id="winner-code"></p><p>당신의 이야기에 귀 기울입니다.</p><button id="close-winner" class="secondary">명단으로 돌아가기</button></div></dialog>
+<dialog id="reset-dialog"><h2>선택한 날짜의 명단을 리셋할까요?</h2><p>현재 이름들은 추첨 명단에서 제외되고,<br>이후 새로 들어오는 시부터 다시 쌓입니다.<br>시트 데이터는 삭제되지 않습니다.</p><div class="actions"><button id="cancel-reset" class="secondary">취소</button><button id="confirm-reset" class="primary">명단 리셋</button></div></dialog>
+</body></html>

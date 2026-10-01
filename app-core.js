@@ -59,11 +59,11 @@ function createSheetStore(env) {
   const spreadsheetId = env.SHEET_ID;
   const range = `'${(env.SHEET_NAME || 'mobile_poems').replace(/'/g, "''")}'!A:H`;
   return {
-    async list() {
+    async list(limit = 10) {
       const response = await sheets.spreadsheets.values.get({ spreadsheetId, range }, { timeout: 20000 });
       return (response.data.values || []).filter(row => idPattern.test(row[0] || '') && row[5])
         .map(row => ({ id: row[0], timestamp: row[1], name: row[2] || '익명', poem: row[5] }))
-        .sort((a, b) => String(b.timestamp).localeCompare(String(a.timestamp))).slice(0, 10);
+        .sort((a, b) => String(b.timestamp).localeCompare(String(a.timestamp))).slice(0, limit);
     },
     async get(id) {
       const response = await sheets.spreadsheets.values.get({ spreadsheetId, range }, { timeout: 20000 });
@@ -118,6 +118,22 @@ function createApp({ store, makePoem, publicBaseUrl = 'http://localhost:3100' })
   });
   app.use(express.json({ limit: '12kb' }));
   app.get('/health', (req, res) => res.json({ ok: true }));
+  app.get('/api/participants', async (req, res, next) => {
+    try {
+      const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+      const day = req.query.date || today;
+      if (typeof day !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(day) || !Number.isFinite(Date.parse(day + 'T00:00:00+09:00'))) return res.status(400).json({ error: '날짜를 확인해 주세요.' });
+      const start = Date.parse(day + 'T00:00:00+09:00');
+      const records = await atStage('sheets.read', () => store.list(Infinity));
+      const seen = new Set();
+      const participants = records.filter(record => {
+        const time = Date.parse(record.timestamp);
+        if (time < start || time >= start + 86400000 || !Number.isFinite(time) || seen.has(record.id)) return false;
+        seen.add(record.id); return true;
+      }).map(({ id, timestamp, name }) => ({ id, timestamp, name: name?.trim() || '익명' }));
+      res.json({ today, date: day, participants });
+    } catch (error) { next(error); }
+  });
   app.get('/api/poems', async (req, res, next) => {
     try {
       const records = await atStage('sheets.read', () => store.list());

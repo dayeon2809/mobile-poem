@@ -116,3 +116,16 @@ test('gallery exposes poems and QR links without survey answers; submissions per
   assert.equal(png.subarray(1,4).toString(), 'PNG');
   assert.equal((await fetch(f.base + '/api/qr/invalid')).status, 404);
 });
+
+test('participant list includes all daily entries using Korean midnight and exposes no answers', async t => {
+  const f = await fixture(t);
+  for (let i=0;i<15;i++) { const id=randomUUID(); f.records.set(id,{id,name:i?'같은 이름':'',timestamp:'2026-09-30T15:00:00.000Z',answers:['private'],poem:'private poem'}); }
+  for (const timestamp of ['2026-09-30T14:59:59.999Z','2026-10-01T15:00:00.000Z','invalid']) { const id=randomUUID(); f.records.set(id,{id,name:'outside',timestamp}); }
+  const response=await fetch(`${f.base}/api/participants?date=2026-10-01`);
+  assert.equal(response.headers.get('cache-control'),'no-store');
+  const result=await response.json();
+  assert.equal(result.participants.length,15);
+  assert.equal(result.participants[0].name,'익명');
+  assert.deepEqual(Object.keys(result.participants[0]).sort(),['id','name','timestamp']);
+  assert.equal((await fetch(`${f.base}/api/participants?date=bad`)).status,400);
+});
