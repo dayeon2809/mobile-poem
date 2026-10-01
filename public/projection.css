@@ -1,0 +1,16 @@
+@media(min-width:801px){
+:root{--projection-top:15svh}
+body::before{content:'';position:fixed;inset:0 0 auto;height:var(--projection-top);background:#000;z-index:10;pointer-events:none}
+body.projection-gallery{margin-top:var(--projection-top);height:calc(100svh - var(--projection-top))}
+body.projection-intro .screen{margin-top:var(--projection-top);min-height:calc(100svh - var(--projection-top));height:calc(100svh - var(--projection-top));padding:2vh 5vw;gap:1vh}
+body.projection-intro main{min-height:0;padding:2vh 2vw;gap:5vw}
+body.projection-intro h1{font-size:clamp(48px,5.5vw,105px)}
+body.projection-intro .intro{margin:20px 0}
+body.projection-intro .qr-link{width:min(100%,30vh);min-width:180px;padding:18px}
+body.projection-intro .join h2{margin:18px 0 10px;font-size:clamp(19px,1.65vw,30px)}
+body.projection-intro .eyebrow{margin-bottom:18px}
+body.projection-intro footer{padding-top:12px}
+body.projection-survey .shell,body.projection-poem .shell{margin-top:var(--projection-top);min-height:calc(100svh - var(--projection-top))}
+body.projection-survey #welcome{min-height:calc(70svh - var(--projection-top))}
+body.projection-survey .poster{max-height:calc(65svh - var(--projection-top))}
+}
