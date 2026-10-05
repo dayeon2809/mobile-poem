@@ -118,6 +118,20 @@ function createApp({ store, makePoem, publicBaseUrl = 'http://localhost:3100' })
   });
   app.use(express.json({ limit: '12kb' }));
   app.get('/health', (req, res) => res.json({ ok: true }));
+  app.get('/api/latest-keywords', async (req, res, next) => {
+    try {
+      const latest = (await atStage('sheets.read', () => store.list(1)))[0];
+      if (!latest) return res.json({ entry: null });
+      const record = await atStage('sheets.read', () => store.get(latest.id));
+      if (!record) return res.json({ entry: null });
+      // Only publish predefined selections, never the optional personal sentence.
+      const keywords = [
+        ...((record.emotions || []).filter(value => emotions.includes(value)).length ? [(record.emotions || []).filter(value => emotions.includes(value)).join(', ')] : []),
+        ...questions.flatMap((question, i) => !question.isTextInput && question.options.includes(record.answers?.[i]) ? [record.answers[i]] : []),
+      ];
+      res.json({ entry: { id: record.id, name: record.name?.trim() || '익명', timestamp: record.timestamp, keywords } });
+    } catch (error) { next(error); }
+  });
   app.get('/api/participants', async (req, res, next) => {
     try {
       const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());

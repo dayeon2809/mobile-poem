@@ -9,6 +9,24 @@ function newDraft() {
 }
 function save() { try { sessionStorage.setItem(draftKey, JSON.stringify(draft)); } catch {} }
 function showStep() {
+  const review = step === config.questions.length + 1;
+  document.body.classList.toggle('reviewing', review);
+  $('review-keywords').hidden = !review;
+  if (review) {
+    $('question').textContent = '내가 선택한 키워드';
+    $('hint').textContent = '선택한 키워드를 확인하고, 나의 몸의 시를 만들어보세요.';
+    $('options').hidden = true; $('answer').hidden = true; $('text-label').hidden = true;
+    $('selected').hidden = true; $('progress').hidden = true; $('step').parentElement.hidden = true;
+    $('review-keywords').replaceChildren();
+    const words = [draft.emotions.join(', '), ...draft.answers.filter((_, i) => !config.questions[i].isTextInput)];
+    words.forEach(word => {
+      const item = document.createElement('li');
+      item.textContent = word || '선택 없음'; $('review-keywords').append(item);
+    });
+    $('next').textContent = '나의 시 만들기'; $('next').disabled = busy;
+    $('status').textContent = ''; $('question').focus(); return;
+  }
+  $('selected').hidden = false; $('progress').hidden = false; $('step').parentElement.hidden = false;
   const isEmotion = step === 0;
   const question = config.questions[step - 1];
   const isText = !isEmotion && question.isTextInput;
@@ -38,13 +56,13 @@ function showStep() {
     };
     $('options').append(button);
   }
-  $('next').textContent = step === config.questions.length ? '나의 시 만들기' : '다음';
+  $('next').textContent = step === config.questions.length ? '내가 한 설문 보기' : '다음';
   updateNext();
   $('question').focus();
 }
 function updateNext() {
   $('selected').textContent = draft.emotions.length ? `선택한 감정: ${draft.emotions.join(', ')}` : '';
-  $('next').disabled = busy || (step === 0 ? !draft.emotions.length : !config.questions[step - 1].isTextInput && !draft.answers[step - 1]);
+  $('next').disabled = busy || (step > config.questions.length ? false : step === 0 ? !draft.emotions.length : !config.questions[step - 1].isTextInput && !draft.answers[step - 1]);
 }
 $('answer').oninput = () => { draft.answers[step - 1] = $('answer').value; save(); };
 $('start').onclick = () => {
@@ -58,7 +76,7 @@ $('back').onclick = () => {
 };
 $('next').onclick = async () => {
   if (busy || $('next').disabled) return;
-  if (step < config.questions.length) { step++; showStep(); return; }
+  if (step <= config.questions.length) { step++; showStep(); return; }
   busy = true; updateNext(); $('back').disabled = true; $('answer').disabled = true;
   $('status').textContent = '당신의 응답으로 시를 쓰고 저장하고 있어요. 잠시 기다려 주세요.';
   $('survey').setAttribute('aria-busy', 'true');

@@ -68,3 +68,13 @@ footer { color: #969696; text-align: center; font-size: 12px; margin: 28px 0 8px
   .actions > * { flex: 1; min-width: 0; font-size: 18px; padding-inline: 12px; }
 }
 
+.keyword-row{display:flex;flex-wrap:wrap;justify-content:center;gap:18px 26px;margin:32px 0}
+.keyword{font-size:clamp(20px,2.8vw,42px);line-height:1.5;color:#e5dcff;word-break:keep-all;overflow-wrap:anywhere}
+.keyword::before{content:'·';color:#9c80d0;margin-right:18px}
+body.reviewing .shell{min-height:100svh;display:flex;flex-direction:column;justify-content:flex-end;padding-bottom:max(30px,env(safe-area-inset-bottom))}
+body.reviewing #survey{width:100%;max-width:1100px;margin:0 auto}
+body.reviewing .brand{margin-top:auto}
+body.reviewing #hint{font-size:15px}
+@media(max-width:600px){.keyword-row{gap:12px 18px}.keyword{font-size:22px}}
+.review-list{display:block;text-align:left;width:fit-content;max-width:100%;margin:24px auto;padding-left:2em;font-size:clamp(18px,2vw,27px);line-height:1.7;color:#e5dcff}
+.review-list li{padding-left:6px;overflow-wrap:anywhere}.review-list li::marker{color:#ae99cb}.review-label{color:#c1b4d2}

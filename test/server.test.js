@@ -129,3 +129,12 @@ test('participant list includes all daily entries using Korean midnight and expo
   assert.deepEqual(Object.keys(result.participants[0]).sort(),['id','name','timestamp']);
   assert.equal((await fetch(`${f.base}/api/participants?date=bad`)).status,400);
 });
+
+test('latest keywords returns only preset selections without personal free text', async t => {
+ const f=await fixture(t);const id=randomUUID();
+ f.records.set(id,{id,timestamp:new Date().toISOString(),name:'테스트 참여자',emotions:['평온'],answers:questions.map(q=>q.isTextInput?'private sentence':q.options[0]),poem:'private poem'});
+ const response=await fetch(`${f.base}/api/latest-keywords`);const data=await response.json();
+ assert.equal(data.entry.id,id);assert.equal(data.entry.name,'테스트 참여자');assert.equal(data.entry.keywords.length,questions.filter(q=>!q.isTextInput).length+1);
+ assert.equal(JSON.stringify(data).includes('private'),false);
+ f.records.clear();assert.equal((await (await fetch(`${f.base}/api/latest-keywords`)).json()).entry,null);
+});
