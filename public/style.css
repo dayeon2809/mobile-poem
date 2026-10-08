@@ -78,3 +78,21 @@ body.reviewing #hint{font-size:15px}
 @media(max-width:600px){.keyword-row{gap:12px 18px}.keyword{font-size:22px}}
 .review-list{display:block;text-align:left;width:fit-content;max-width:100%;margin:24px auto;padding-left:2em;font-size:clamp(18px,2vw,27px);line-height:1.7;color:#e5dcff}
 .review-list li{padding-left:6px;overflow-wrap:anywhere}.review-list li::marker{color:#ae99cb}.review-label{color:#c1b4d2}
+
+/* Desktop survey: keep the question and controls together at the bottom. */
+@media(min-width:801px){
+  body.projection-survey:has(#survey:not([hidden])) .shell{min-height:100svh;display:flex;flex-direction:column;justify-content:flex-end;padding-top:20px;padding-bottom:18px}
+  body.projection-survey:has(#survey:not([hidden])) .brand{margin:0 0 20px}
+  body.projection-survey #survey{width:100%;margin:0 auto;padding:8px 0}
+  body.projection-survey #survey h1{margin:0 0 10px;font-size:clamp(22px,2.4vw,30px)}
+  body.projection-survey #hint{margin:8px 0;font-size:18px}
+  body.projection-survey .options{margin:16px auto;gap:12px 24px}
+  body.projection-survey .options.emotions{width:min(460px,43svh)}
+  body.projection-survey .emotions .option{font-size:clamp(12px,1.8vh,19px)}
+  body.projection-survey #selected{margin:8px 0;font-size:17px}
+  body.projection-survey .actions{margin-top:14px}
+  body.projection-survey progress{margin:16px auto 8px;height:10px}
+  body.projection-survey .progress-label{margin:6px 0;font-size:16px}
+  body.projection-survey #status:empty,body.projection-survey #load-error:empty{display:none}
+  body.projection-survey:has(#survey:not([hidden])) footer{margin:12px 0 0}
+}
